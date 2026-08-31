@@ -9,7 +9,7 @@ const CONFIG: Record<QuestionStatus, { label: string; className: string; icon: J
   },
   unanswered: {
     label: 'Unanswered',
-    className: 'bg-signal-amber/10 text-signal-amber border-signal-amber/30',
+    className: 'bg-signal-amber/25 text-ink-100 border-signal-amber',
     icon: <Clock size={13} />,
   },
   archived: {

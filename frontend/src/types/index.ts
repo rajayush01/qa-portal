@@ -34,6 +34,7 @@ export interface Question {
   answeredBy?: string;
   answeredByName?: string;
   answeredAt?: string;
+  answeredInPerson?: boolean;
   sessionFlagged: boolean;
   createdAt: string;
   updatedAt: string;

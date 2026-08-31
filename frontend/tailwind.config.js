@@ -4,28 +4,33 @@ export default {
   theme: {
     extend: {
       colors: {
+        // NOTE: this scale runs light -> dark as the number goes 950 -> 100
+        // (the reverse of Tailwind's own convention). That's intentional:
+        // every component was written against "ink-950 = page background"
+        // and "ink-100 = primary text", so re-pointing those two ends at a
+        // light theme here re-themes the whole app without touching markup.
         ink: {
-          950: '#0B0F17',
-          900: '#0F141D',
-          800: '#161C28',
-          700: '#1E2635',
-          600: '#2A3346',
-          500: '#3C475D',
-          400: '#5A6478',
-          300: '#8891A3',
-          200: '#B7BECC',
-          100: '#E4E7ED',
+          950: '#FFFFFF', // page background — the "whitish" base
+          900: '#F8F4E1', // brand cream — sidebars, panels, secondary surfaces
+          800: '#F1E8CC', // card surfaces / hover backgrounds
+          700: '#E2D4AE', // card & input borders
+          600: '#C8B78C', // deeper borders, dividers, toggle-off state
+          500: '#786E54', // muted tertiary text, icons
+          400: '#5B6B69', // secondary body text
+          300: '#33484A', // darker secondary / regular text
+          200: '#1B3234', // near-black teal, alt heading text
+          100: '#0A2224', // primary text & headings
         },
         accent: {
-          600: '#4C5FE0',
-          500: '#5B6EF5',
-          400: '#7C8CF8',
-          300: '#A6B1FA',
+          300: '#0F7A82',
+          400: '#00767E',
+          500: '#007078', // brand primary teal
+          600: '#00565D',
         },
         signal: {
-          amber: '#E8A33D',
-          green: '#3FBF80',
-          red: '#E1554E',
+          amber: '#FFC600', // brand gold — used sparingly, as an accent/fill only
+          green: '#15794F',
+          red: '#C93B3B',
         },
       },
       fontFamily: {
@@ -34,17 +39,17 @@ export default {
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       boxShadow: {
-        card: '0 1px 2px rgba(11,15,23,0.06), 0 8px 24px -8px rgba(11,15,23,0.12)',
-        popover: '0 12px 40px -12px rgba(11,15,23,0.45)',
+        card: '0 1px 2px rgba(10,34,36,0.06), 0 8px 24px -8px rgba(10,34,36,0.12)',
+        popover: '0 12px 40px -12px rgba(10,34,36,0.35)',
       },
       keyframes: {
         pulseRing: {
-          '0%': { boxShadow: '0 0 0 0 rgba(91,110,245,0.45)' },
-          '100%': { boxShadow: '0 0 0 10px rgba(91,110,245,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(201,59,59,0.45)' },
+          '100%': { boxShadow: '0 0 0 10px rgba(201,59,59,0)' },
         },
         highlightIn: {
-          '0%': { backgroundColor: 'rgba(91,110,245,0.16)' },
-          '100%': { backgroundColor: 'rgba(91,110,245,0)' },
+          '0%': { backgroundColor: 'rgba(255,198,0,0.18)' },
+          '100%': { backgroundColor: 'rgba(255,198,0,0)' },
         },
       },
       animation: {

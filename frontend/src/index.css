@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -22,12 +22,12 @@ body {
 }
 
 ::selection {
-  background: rgba(91, 110, 245, 0.35);
+  background: rgba(0, 112, 120, 0.22);
 }
 
 /* Visible keyboard focus everywhere, respecting the design language */
 :focus-visible {
-  outline: 2px solid #7c8cf8;
+  outline: 2px solid #007078;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -51,12 +51,12 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a3346;
+  background: #c8b78c;
   border-radius: 999px;
-  border: 2px solid #0f141d;
+  border: 2px solid #ffffff;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3c475d;
+  background: #786e54;
 }
 
 .font-display {

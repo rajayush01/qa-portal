@@ -63,6 +63,10 @@ export const adminApi = {
     api.post<{ success: boolean; question: Question }>(`/admin/questions/${questionId}/answer`, {
       answer,
     }),
+  answerInPerson: (questionId: string) =>
+    api.post<{ success: boolean; question: Question }>(
+      `/admin/questions/${questionId}/answer-in-person`
+    ),
   flag: (questionId: string) =>
     api.post<{ success: boolean; question: Question }>(`/admin/questions/${questionId}/flag`),
   exportUrl: (filters: AdminFilters, all: boolean) => {

@@ -138,6 +138,34 @@ export const answerQuestion = asyncHandler(async (req: Request, res: Response) =
   question.answeredByName = req.user.name;
   question.answeredAt = new Date();
   question.status = 'answered';
+  question.answeredInPerson = false;
+  question.sessionFlagged = false;
+  await question.save();
+
+  emitQuestionAnswered(question);
+
+  res.status(200).json({ success: true, question });
+});
+
+// For questions answered verbally during a live session — no written answer
+// is required, but the question still needs to be marked Answered so the
+// submitter sees it resolved on their dashboard.
+export const markAnsweredInPerson = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) throw ApiError.unauthorized();
+
+  const question = await Question.findOne({ questionId: req.params.questionId });
+  if (!question) throw ApiError.notFound('Question not found.');
+
+  if (question.status === 'answered') {
+    throw ApiError.conflict('This question has already been answered.');
+  }
+
+  question.answer = undefined;
+  question.answeredBy = req.user.id as any;
+  question.answeredByName = req.user.name;
+  question.answeredAt = new Date();
+  question.status = 'answered';
+  question.answeredInPerson = true;
   question.sessionFlagged = false;
   await question.save();
 

@@ -48,7 +48,7 @@ export const streamQuestionsExcel = async (
       category: q.category,
       question: q.questionText,
       status: q.status,
-      answer: q.answer || '',
+      answer: q.answer || (q.answeredInPerson ? 'Answered in person (live session)' : ''),
       submittedAt: q.createdAt ? new Date(q.createdAt).toLocaleString() : '',
       answeredAt: q.answeredAt ? new Date(q.answeredAt).toLocaleString() : '',
       answeredBy: q.answeredByName || '',

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { X, Calendar, Building2, MapPin, Tag, User as UserIcon, Bookmark } from 'lucide-react';
+import { X, Calendar, Building2, MapPin, Tag, User as UserIcon, Bookmark, CheckCircle2 } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip, AttachmentList } from '@/components/common/QuestionBits';
 import { Textarea } from '@/components/common/FormFields';
 import { Button } from '@/components/common/Button';
+import { ConfirmDialog } from '@/components/common/States';
 import { adminApi } from '@/services/endpoints';
 
 const fmt = (d?: string) => (d ? new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
@@ -26,6 +27,8 @@ export const AdminAnswerModal = ({
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [flagging, setFlagging] = useState(false);
+  const [markingInPerson, setMarkingInPerson] = useState(false);
+  const [confirmInPersonOpen, setConfirmInPersonOpen] = useState(false);
 
   useEffect(() => {
     setAnswer(question?.answer || '');
@@ -62,6 +65,21 @@ export const AdminAnswerModal = ({
       toast.error((err as Error).message);
     } finally {
       setFlagging(false);
+    }
+  };
+
+  const markInPerson = async () => {
+    setMarkingInPerson(true);
+    try {
+      const { data } = await adminApi.answerInPerson(question.questionId);
+      toast.success(`${question.questionId} marked as answered.`);
+      onAnswered(data.question);
+      setConfirmInPersonOpen(false);
+      onClose();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setMarkingInPerson(false);
     }
   };
 
@@ -130,28 +148,53 @@ export const AdminAnswerModal = ({
               </div>
             )}
 
-            <div>
-              <Textarea
-                label="Answer"
-                rows={5}
-                maxLength={MAX_ANSWER}
-                placeholder="Write your answer…"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                disabled={question.status === 'answered'}
-              />
-              {question.status === 'answered' && question.answeredByName && (
-                <p className="mt-1.5 text-xs text-ink-500">
-                  Answered {fmt(question.answeredAt)} by {question.answeredByName}
+            {question.status === 'answered' && question.answeredInPerson ? (
+              <div className="rounded-lg border border-signal-green/25 bg-signal-green/5 p-4 text-sm text-ink-200">
+                <p className="flex items-center gap-1.5 font-medium text-signal-green">
+                  <CheckCircle2 size={15} />
+                  Answered in person during the live session
                 </p>
-              )}
-            </div>
+                <p className="mt-1 text-xs text-ink-400">
+                  No written answer was recorded — the question was resolved verbally.
+                </p>
+                {question.answeredByName && (
+                  <p className="mt-1.5 text-xs text-ink-500">
+                    Marked answered {fmt(question.answeredAt)} by {question.answeredByName}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <Textarea
+                  label="Answer"
+                  rows={5}
+                  maxLength={MAX_ANSWER}
+                  placeholder="Write your answer…"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  disabled={question.status === 'answered'}
+                />
+                {question.status === 'answered' && question.answeredByName && (
+                  <p className="mt-1.5 text-xs text-ink-500">
+                    Answered {fmt(question.answeredAt)} by {question.answeredByName}
+                  </p>
+                )}
+              </div>
+            )}
 
             {question.status !== 'answered' && (
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                 <Button variant="secondary" onClick={flagForLater} loading={flagging}>
                   <Bookmark size={15} />
                   Mark for Later
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setConfirmInPersonOpen(true)}
+                  disabled={markingInPerson}
+                >
+                  <CheckCircle2 size={15} />
+                  Answered
                 </Button>
                 <Button onClick={submit} loading={submitting}>
                   Submit Answer
@@ -161,6 +204,16 @@ export const AdminAnswerModal = ({
           </div>
         </motion.div>
       </motion.div>
+
+      <ConfirmDialog
+        open={confirmInPersonOpen}
+        title="Mark as answered?"
+        description={`This will mark ${question.questionId} as Answered without a written reply, since it was addressed during the live session. The submitter will see it as answered right away.`}
+        confirmLabel="Mark Answered"
+        loading={markingInPerson}
+        onConfirm={markInPerson}
+        onCancel={() => setConfirmInPersonOpen(false)}
+      />
     </AnimatePresence>
   );
 };

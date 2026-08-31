@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Radio, Bookmark, MessageSquareReply, Paperclip } from 'lucide-react';
+import { Radio, Bookmark, MessageSquareReply, Paperclip, CheckCircle2 } from 'lucide-react';
 import { adminApi } from '@/services/endpoints';
 import { Question } from '@/types';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
 import { Button } from '@/components/common/Button';
 import { AdminAnswerModal } from '@/components/admin/AdminAnswerModal';
-import { EmptyState } from '@/components/common/States';
+import { EmptyState, ConfirmDialog } from '@/components/common/States';
 import { useSocket } from '@/context/SocketContext';
 
 export const LiveSessionPage = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selected, setSelected] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
+  const [confirmTarget, setConfirmTarget] = useState<Question | null>(null);
+  const [markingId, setMarkingId] = useState<string | null>(null);
   const { socket, connected } = useSocket();
 
   useEffect(() => {
@@ -55,6 +57,21 @@ export const LiveSessionPage = () => {
     setQuestions((prev) => prev.map((q) => (q.questionId === updated.questionId ? updated : q)));
   };
 
+  const confirmQuickAnswer = async () => {
+    if (!confirmTarget) return;
+    setMarkingId(confirmTarget.questionId);
+    try {
+      await adminApi.answerInPerson(confirmTarget.questionId);
+      toast.success(`${confirmTarget.questionId} marked as answered.`);
+      setQuestions((prev) => prev.filter((q) => q.questionId !== confirmTarget.questionId));
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setMarkingId(null);
+      setConfirmTarget(null);
+    }
+  };
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-3">
@@ -94,7 +111,7 @@ export const LiveSessionPage = () => {
                   <span className="rounded-full bg-ink-800 px-2 py-0.5 text-xs text-ink-300">{q.department}</span>
                   <span className="rounded-full bg-ink-800 px-2 py-0.5 text-xs text-ink-300">{q.category}</span>
                   {q.sessionFlagged && (
-                    <span className="flex items-center gap-1 rounded-full bg-signal-amber/10 px-2 py-0.5 text-xs text-signal-amber">
+                    <span className="flex items-center gap-1 rounded-full bg-signal-amber/25 border border-signal-amber px-2 py-0.5 text-xs text-ink-100">
                       <Bookmark size={11} />
                       For later
                     </span>
@@ -107,7 +124,16 @@ export const LiveSessionPage = () => {
                   )}
                 </div>
                 <p className="text-sm leading-relaxed text-ink-100">{q.questionText}</p>
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setConfirmTarget(q)}
+                    disabled={markingId === q.questionId}
+                  >
+                    <CheckCircle2 size={14} />
+                    Answered
+                  </Button>
                   <Button size="sm" onClick={() => setSelected(q)}>
                     <MessageSquareReply size={14} />
                     Answer
@@ -124,6 +150,20 @@ export const LiveSessionPage = () => {
         onClose={() => setSelected(null)}
         onAnswered={handleAnswered}
         onFlag={handleFlag}
+      />
+
+      <ConfirmDialog
+        open={!!confirmTarget}
+        title="Mark as answered?"
+        description={
+          confirmTarget
+            ? `This will mark ${confirmTarget.questionId} as Answered without a written reply, since it was addressed live. The submitter will see it as answered right away.`
+            : ''
+        }
+        confirmLabel="Mark Answered"
+        loading={!!markingId}
+        onConfirm={confirmQuickAnswer}
+        onCancel={() => setConfirmTarget(null)}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import {
   listQuestions,
   getQuestionById,
   answerQuestion,
+  markAnsweredInPerson,
   flagForLater,
   exportQuestions,
   getFacets,
@@ -19,6 +20,7 @@ router.get('/facets', getFacets);
 router.get('/questions/export', exportQuestions);
 router.get('/questions/:questionId', getQuestionById);
 router.post('/questions/:questionId/answer', answerQuestion);
+router.post('/questions/:questionId/answer-in-person', markAnsweredInPerson);
 router.post('/questions/:questionId/flag', flagForLater);
 router.get('/questions', listQuestions);
 

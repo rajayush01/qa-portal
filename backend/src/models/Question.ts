@@ -26,6 +26,7 @@ export interface IQuestion extends Document {
   answeredBy?: Types.ObjectId;
   answeredByName?: string;
   answeredAt?: Date;
+  answeredInPerson: boolean;
   sessionFlagged: boolean; // "mark for later" during a live session
   createdAt: Date;
   updatedAt: Date;
@@ -63,6 +64,7 @@ const questionSchema = new Schema<IQuestion>(
     answeredBy: { type: Schema.Types.ObjectId, ref: 'User' },
     answeredByName: { type: String },
     answeredAt: { type: Date },
+    answeredInPerson: { type: Boolean, default: false },
     sessionFlagged: { type: Boolean, default: false },
   },
   { timestamps: true }

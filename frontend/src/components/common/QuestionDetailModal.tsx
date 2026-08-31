@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Building2, MapPin, Tag, User as UserIcon } from 'lucide-react';
+import { X, Calendar, Building2, MapPin, Tag, User as UserIcon, CheckCircle2 } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip, AttachmentList } from '@/components/common/QuestionBits';
@@ -79,16 +79,32 @@ export const QuestionDetailModal = ({
             )}
 
             {question.status === 'answered' ? (
-              <div>
-                <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-signal-green">Admin answer</p>
-                <p className="whitespace-pre-wrap rounded-lg border border-signal-green/25 bg-signal-green/5 p-4 text-sm leading-relaxed text-ink-100">
-                  {question.answer}
-                </p>
-                <p className="mt-2 text-xs text-ink-500">
-                  Answered {fmt(question.answeredAt)}
-                  {question.answeredByName ? ` by ${question.answeredByName}` : ''}
-                </p>
-              </div>
+              question.answeredInPerson ? (
+                <div className="rounded-lg border border-signal-green/25 bg-signal-green/5 p-4 text-sm text-ink-200">
+                  <p className="flex items-center gap-1.5 font-medium text-signal-green">
+                    <CheckCircle2 size={15} />
+                    Answered in person during the live session
+                  </p>
+                  <p className="mt-1 text-xs text-ink-400">
+                    This question was addressed verbally, so there's no written reply here.
+                  </p>
+                  <p className="mt-2 text-xs text-ink-500">
+                    Answered {fmt(question.answeredAt)}
+                    {question.answeredByName ? ` by ${question.answeredByName}` : ''}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-signal-green">Admin answer</p>
+                  <p className="whitespace-pre-wrap rounded-lg border border-signal-green/25 bg-signal-green/5 p-4 text-sm leading-relaxed text-ink-100">
+                    {question.answer}
+                  </p>
+                  <p className="mt-2 text-xs text-ink-500">
+                    Answered {fmt(question.answeredAt)}
+                    {question.answeredByName ? ` by ${question.answeredByName}` : ''}
+                  </p>
+                </div>
+              )
             ) : (
               <div className="rounded-lg border border-dashed border-ink-600 bg-ink-900/60 p-4 text-center text-sm text-ink-400">
                 This question hasn't been answered yet.
