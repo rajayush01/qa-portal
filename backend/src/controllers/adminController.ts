@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { FilterQuery } from 'mongoose';
-import { Question, IQuestion } from '../models/Question';
+import { Question, IQuestion, QUESTION_SCOPES } from '../models/Question';
 import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { requireString } from '../utils/validate';
@@ -56,6 +56,17 @@ const buildFilter = (query: Request['query']): FilterQuery<IQuestion> => {
 
   const category = query.category as string | undefined;
   if (category && category !== 'all') filter.category = category;
+
+  const scope = query.scope as string | undefined;
+  if (scope && (QUESTION_SCOPES as readonly string[]).includes(scope)) {
+    if (scope === 'other') {
+      // Legacy questions without a scope count as "other".
+      const legacy = [{ scope: 'other' }, { scope: { $exists: false } }];
+      filter.$and = [...(filter.$and ?? []), { $or: legacy }];
+    } else {
+      filter.scope = scope;
+    }
+  }
 
   const location = query.location as string | undefined;
   if (location && location !== 'all') filter.location = location;

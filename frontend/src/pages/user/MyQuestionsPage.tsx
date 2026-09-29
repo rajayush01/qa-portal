@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { Inbox, CheckCircle2, Clock } from 'lucide-react';
 import { questionApi } from '@/services/endpoints';
 import { Question } from '@/types';
+import { SCOPE_OPTIONS } from '@/constants/scopes';
 import { QuestionCard } from '@/components/user/QuestionCard';
 import { QuestionDetailModal } from '@/components/common/QuestionDetailModal';
 import { CardSkeleton, EmptyState } from '@/components/common/States';
@@ -31,20 +32,21 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Question | null>(null);
+  const [scope, setScope] = useState<'all' | string>('all');
   const { socket } = useSocket();
   const copy = COPY[status];
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await questionApi.my(status === 'all' ? undefined : status, 1, 50);
+      const { data } = await questionApi.my(status === 'all' ? undefined : status, 1, 50, scope);
       setQuestions(data.questions);
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [status]);
+  }, [status, scope]);
 
   useEffect(() => {
     load();
@@ -69,12 +71,39 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
     };
   }, [socket]);
 
-  const filtered =
-    status === 'all' ? questions : questions.filter((q) => q.status === status);
+  // Server already filters by scope; keep the client-side guard so a live
+  // socket update can never leak a non-matching card into the list.
+  const filtered = questions.filter(
+    (q) =>
+      (status === 'all' || q.status === status) &&
+      (scope === 'all' || (q.scope ?? 'other') === scope)
+  );
 
   return (
     <div>
-      <h1 className="mb-6 font-display text-2xl text-ink-100">{copy.title}</h1>
+      <h1 className="mb-4 font-display text-2xl text-ink-100">{copy.title}</h1>
+
+      <div className="mb-6 flex flex-wrap gap-2" role="radiogroup" aria-label="Filter by scope">
+        {[{ value: 'all', label: 'All' }, ...SCOPE_OPTIONS].map((o) => {
+          const active = scope === o.value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setScope(o.value)}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                active
+                  ? 'border-accent-500 bg-accent-500/10 text-accent-300'
+                  : 'border-ink-600 text-ink-300 hover:border-ink-500'
+              }`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

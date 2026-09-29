@@ -2,6 +2,12 @@ import ExcelJS from 'exceljs';
 import { IQuestion } from '../models/Question';
 import { Response } from 'express';
 
+const SCOPE_LABELS: Record<string, string> = {
+  'one-earth': 'One Earth',
+  sites: 'Sites',
+  other: 'Other',
+};
+
 export const streamQuestionsExcel = async (
   res: Response,
   questions: IQuestion[],
@@ -20,6 +26,7 @@ export const streamQuestionsExcel = async (
     { header: 'Name', key: 'name', width: 20 },
     { header: 'Anonymous', key: 'anonymous', width: 12 },
     { header: 'Department', key: 'department', width: 16 },
+    { header: 'Scope', key: 'scope', width: 14 },
     { header: 'Location', key: 'location', width: 16 },
     { header: 'Category', key: 'category', width: 16 },
     { header: 'Question', key: 'question', width: 50 },
@@ -44,6 +51,7 @@ export const streamQuestionsExcel = async (
       name: q.isAnonymous ? 'Anonymous' : q.name || '—',
       anonymous: q.isAnonymous ? 'Yes' : 'No',
       department: q.department,
+      scope: SCOPE_LABELS[q.scope] ?? 'Other',
       location: q.location,
       category: q.category,
       question: q.questionText,
@@ -55,7 +63,7 @@ export const streamQuestionsExcel = async (
     });
   });
 
-  sheet.autoFilter = { from: 'A1', to: 'L1' };
+  sheet.autoFilter = { from: 'A1', to: 'M1' };
 
   res.setHeader(
     'Content-Type',

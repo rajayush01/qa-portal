@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Building2, MapPin, Tag, User as UserIcon, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Building2, Layers, MapPin, Tag, User as UserIcon, CheckCircle2 } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip, AttachmentList } from '@/components/common/QuestionBits';
+import { scopeLabel } from '@/constants/scopes';
 
 const fmt = (d?: string) => (d ? new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
 
@@ -53,6 +54,10 @@ export const QuestionDetailModal = ({
               <div className="flex items-center gap-2 text-ink-400">
                 <Building2 size={14} />
                 {question.department}
+              </div>
+              <div className="flex items-center gap-2 text-ink-400">
+                <Layers size={14} />
+                {scopeLabel(question.scope)}
               </div>
               <div className="flex items-center gap-2 text-ink-400">
                 <MapPin size={14} />

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Search, Download, ChevronDown } from 'lucide-react';
 import { AdminFilters } from '@/types';
 import { Button } from '@/components/common/Button';
+import { SCOPE_OPTIONS } from '@/constants/scopes';
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All statuses' },
@@ -79,6 +80,19 @@ export const FilterBar = ({
             ))}
           </select>
         )}
+
+        <select
+          value={filters.scope || 'all'}
+          onChange={(e) => onChange({ ...filters, scope: e.target.value, page: 1 })}
+          className={selectClass}
+        >
+          <option value="all">All scopes</option>
+          {SCOPE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
 
         <select
           value={filters.department || 'all'}

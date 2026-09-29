@@ -63,6 +63,54 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 );
 Select.displayName = 'Select';
 
+interface RadioGroupProps<T extends string> extends FieldWrapProps {
+  name: string;
+  value: T | '';
+  onChange: (value: T) => void;
+  options: { value: T; label: string }[];
+}
+
+export const RadioGroup = <T extends string>({
+  name,
+  label,
+  error,
+  hint,
+  required,
+  value,
+  onChange,
+  options,
+}: RadioGroupProps<T>) => (
+  <FieldChrome label={label} error={error} hint={hint} required={required}>
+    <div role="radiogroup" aria-label={label} className="grid grid-cols-3 gap-2">
+      {options.map((o) => {
+        const checked = value === o.value;
+        return (
+          <label
+            key={o.value}
+            className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+              checked
+                ? 'border-accent-500 bg-accent-500/10 text-ink-100'
+                : error
+                ? 'border-signal-red text-ink-300'
+                : 'border-ink-600 bg-ink-900 text-ink-300 hover:border-ink-500'
+            }`}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={o.value}
+              checked={checked}
+              onChange={() => onChange(o.value)}
+              className="h-4 w-4 shrink-0 accent-[#6366f1]"
+            />
+            {o.label}
+          </label>
+        );
+      })}
+    </div>
+  </FieldChrome>
+);
+
 type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & FieldWrapProps;
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, hint, required, className = '', ...rest }, ref) => (

@@ -3,6 +3,7 @@ import { Paperclip, Bookmark } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
+import { scopeLabel } from '@/constants/scopes';
 
 const fmt = (d: string) => new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -23,6 +24,7 @@ export const QuestionsTable = ({
           <tr className="border-b border-ink-700 bg-ink-900/80 text-xs uppercase tracking-wide text-ink-400">
             <th className="px-4 py-3 font-medium">Question ID</th>
             <th className="px-4 py-3 font-medium">Submitter</th>
+            <th className="px-4 py-3 font-medium">Scope</th>
             <th className="px-4 py-3 font-medium">Dept / Category</th>
             <th className="px-4 py-3 font-medium">Question</th>
             <th className="px-4 py-3 font-medium">Submitted</th>
@@ -46,6 +48,7 @@ export const QuestionsTable = ({
                 </div>
               </td>
               <td className="px-4 py-3.5 text-ink-300">{q.isAnonymous ? 'Anonymous' : q.name || '—'}</td>
+              <td className="px-4 py-3.5 text-ink-300">{scopeLabel(q.scope)}</td>
               <td className="px-4 py-3.5 text-ink-300">
                 <div>{q.department}</div>
                 <div className="text-xs text-ink-500">{q.category}</div>
@@ -90,7 +93,7 @@ export const QuestionsTable = ({
           <p className="line-clamp-2 text-sm text-ink-100">{q.questionText}</p>
           <div className="mt-2 flex items-center justify-between text-xs text-ink-400">
             <span>
-              {q.department} · {q.category}
+              {scopeLabel(q.scope)} · {q.department} · {q.category}
             </span>
             <span>{fmt(q.createdAt)}</span>
           </div>

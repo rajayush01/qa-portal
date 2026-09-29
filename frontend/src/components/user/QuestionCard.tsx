@@ -3,6 +3,7 @@ import { Paperclip, ChevronRight } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
+import { scopeLabel } from '@/constants/scopes';
 
 const fmt = (d: string) => new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -16,6 +17,9 @@ export const QuestionCard = ({ question, onOpen }: { question: Question; onOpen:
   >
     <div className="mb-3 flex items-center justify-between">
       <QuestionIdChip id={question.questionId} />
+      <span className="rounded-full border border-ink-600 px-2.5 py-0.5 text-[11px] font-medium text-ink-300">
+        {scopeLabel(question.scope)}
+      </span>
       {/* <StatusBadge status={question.status} /> */}
     </div>
     <p className="line-clamp-2 text-sm leading-relaxed text-ink-100">{question.questionText}</p>

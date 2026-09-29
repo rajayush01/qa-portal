@@ -10,6 +10,7 @@ export interface AuthUser {
 }
 
 export type QuestionStatus = 'unanswered' | 'answered' | 'archived';
+export type QuestionScope = 'one-earth' | 'sites' | 'other';
 
 export interface Attachment {
   fileName: string;
@@ -25,6 +26,7 @@ export interface Question {
   isAnonymous: boolean;
   name?: string | null;
   department: string;
+  scope: QuestionScope;
   location: string;
   category: string;
   questionText: string;
@@ -66,6 +68,7 @@ export interface AdminFilters {
   status?: string;
   department?: string;
   category?: string;
+  scope?: string;
   location?: string;
   datePreset?: string;
   page?: number;

@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Paperclip, X, FileText, CheckCircle2, Loader2 } from 'lucide-react';
-import { Input, Select, Textarea } from '@/components/common/FormFields';
+import { Input, RadioGroup, Select, Textarea } from '@/components/common/FormFields';
 import { Button } from '@/components/common/Button';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
 import { questionApi, taxonomyApi } from '@/services/endpoints';
-import { TaxonomyEntry } from '@/types';
+import { QuestionScope, TaxonomyEntry } from '@/types';
+import { SCOPE_OPTIONS } from '@/constants/scopes';
 
 const MAX_CHARS = 1000;
 const MAX_FILES = 5;
@@ -28,6 +29,7 @@ export const AskQuestionPage = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [name, setName] = useState('');
   const [department, setDepartment] = useState('');
+  const [scope, setScope] = useState<QuestionScope | ''>('');
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('');
   const [questionText, setQuestionText] = useState('');
@@ -85,6 +87,7 @@ export const AskQuestionPage = () => {
     const next: Record<string, string> = {};
     if (!isAnonymous && !name.trim()) next.name = 'Name is required unless submitting anonymously.';
     if (!department) next.department = 'Select a department.';
+    if (!scope) next.scope = 'Select One Earth, Sites or Other.';
     if (!location.trim()) next.location = 'Location is required.';
     if (!category) next.category = 'Select a category.';
     if (!questionText.trim()) next.questionText = 'Enter your question.';
@@ -103,6 +106,7 @@ export const AskQuestionPage = () => {
       formData.append('isAnonymous', String(isAnonymous));
       if (!isAnonymous) formData.append('name', name.trim());
       formData.append('department', department);
+      formData.append('scope', scope);
       formData.append('location', location.trim());
       formData.append('category', category);
       formData.append('questionText', questionText.trim());
@@ -120,6 +124,7 @@ export const AskQuestionPage = () => {
   const resetForm = () => {
     setSuccessId(null);
     setName('');
+    setScope('');
     setLocation('');
     setQuestionText('');
     setFiles([]);
@@ -232,6 +237,19 @@ export const AskQuestionPage = () => {
             ))}
           </Select>
         </div>
+
+        <RadioGroup<QuestionScope>
+          name="scope"
+          label="Scope"
+          required
+          options={SCOPE_OPTIONS}
+          value={scope}
+          onChange={(v) => {
+            setScope(v);
+            setErrors((prev) => ({ ...prev, scope: '' }));
+          }}
+          error={errors.scope}
+        />
 
         <Input
           label="Location"

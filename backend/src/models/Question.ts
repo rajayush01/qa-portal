@@ -2,6 +2,9 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export type QuestionStatus = 'unanswered' | 'answered' | 'archived';
 
+export const QUESTION_SCOPES = ['one-earth', 'sites', 'other'] as const;
+export type QuestionScope = (typeof QUESTION_SCOPES)[number];
+
 export interface IAttachment {
   fileName: string;
   originalName: string;
@@ -17,6 +20,7 @@ export interface IQuestion extends Document {
   isAnonymous: boolean;
   name?: string;
   department: string;
+  scope: QuestionScope;
   location: string;
   category: string;
   questionText: string;
@@ -50,6 +54,7 @@ const questionSchema = new Schema<IQuestion>(
     isAnonymous: { type: Boolean, default: false },
     name: { type: String, trim: true, maxlength: 120 },
     department: { type: String, required: true, trim: true, index: true },
+    scope: { type: String, enum: QUESTION_SCOPES, default: 'other', required: true, index: true },
     location: { type: String, required: true, trim: true, index: true },
     category: { type: String, required: true, trim: true, index: true },
     questionText: { type: String, required: true, trim: true, maxlength: 1000 },

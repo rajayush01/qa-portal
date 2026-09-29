@@ -25,9 +25,9 @@ export const questionApi = {
     api.post<{ success: boolean; question: Question }>('/questions', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
-  my: (status?: string, page = 1, limit = 20) =>
+  my: (status?: string, page = 1, limit = 20, scope?: string) =>
     api.get<{ success: boolean; questions: Question[]; pagination: Pagination }>('/questions/my', {
-      params: { status, page, limit },
+      params: { status, page, limit, scope: scope && scope !== 'all' ? scope : undefined },
     }),
   byId: (questionId: string) =>
     api.get<{ success: boolean; question: Question }>(`/questions/${questionId}`),
@@ -38,6 +38,7 @@ const buildParams = (filters: AdminFilters) => ({
   status: filters.status && filters.status !== 'all' ? filters.status : undefined,
   department: filters.department && filters.department !== 'all' ? filters.department : undefined,
   category: filters.category && filters.category !== 'all' ? filters.category : undefined,
+  scope: filters.scope && filters.scope !== 'all' ? filters.scope : undefined,
   location: filters.location && filters.location !== 'all' ? filters.location : undefined,
   datePreset: filters.datePreset && filters.datePreset !== 'all' ? filters.datePreset : undefined,
   sessionFlagged: filters.sessionFlagged || undefined,
