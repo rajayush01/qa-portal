@@ -16,7 +16,7 @@ export const QuestionCard = ({ question, onOpen }: { question: Question; onOpen:
   >
     <div className="mb-3 flex items-center justify-between">
       <QuestionIdChip id={question.questionId} />
-      <StatusBadge status={question.status} />
+      {/* <StatusBadge status={question.status} /> */}
     </div>
     <p className="line-clamp-2 text-sm leading-relaxed text-ink-100">{question.questionText}</p>
     <div className="mt-4 flex items-center justify-between">

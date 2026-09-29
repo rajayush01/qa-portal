@@ -6,8 +6,8 @@ import { useSocket } from '@/context/SocketContext';
 const NAV = [
   { to: '/dashboard/ask', label: 'Ask Question', icon: MessageSquarePlus },
   { to: '/dashboard', label: 'My Questions', icon: LayoutList, end: true },
-  { to: '/dashboard/answered', label: 'Answered', icon: CheckCircle2 },
-  { to: '/dashboard/unanswered', label: 'Unanswered', icon: Clock },
+  // { to: '/dashboard/answered', label: 'Answered', icon: CheckCircle2 },
+  // { to: '/dashboard/unanswered', label: 'Unanswered', icon: Clock },
 ];
 
 export const UserLayout = () => {

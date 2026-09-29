@@ -33,7 +33,7 @@ export const QuestionDetailModal = ({
           <div className="sticky top-0 flex items-center justify-between border-b border-ink-700 bg-ink-800 px-6 py-4">
             <div className="flex items-center gap-3">
               <QuestionIdChip id={question.questionId} />
-              <StatusBadge status={question.status} />
+              {/* <StatusBadge status={question.status} /> */}
             </div>
             <button onClick={onClose} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-700 hover:text-ink-100">
               <X size={18} />

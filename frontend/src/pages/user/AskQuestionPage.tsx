@@ -206,7 +206,7 @@ export const AskQuestionPage = () => {
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Select
-            label="Department"
+            label="Your question's department"
             required
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
