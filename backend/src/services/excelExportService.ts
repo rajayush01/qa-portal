@@ -4,6 +4,11 @@ import { Response } from 'express';
 
 const SCOPE_LABELS: Record<string, string> = {
   'one-earth': 'One Earth',
+  'other-offices': 'Other Offices',
+  'project-sites': 'Project Sites',
+  'oms-sites': 'OMS Sites',
+  'manufacturing-plant': 'Manufacturing Plant',
+  international: 'International',
   sites: 'Sites',
   other: 'Other',
 };
