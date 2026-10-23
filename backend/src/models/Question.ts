@@ -2,7 +2,15 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export type QuestionStatus = 'unanswered' | 'answered' | 'archived';
 
-export const QUESTION_SCOPES = ['one-earth', 'sites', 'other'] as const;
+export const QUESTION_SCOPES = [
+  'one-earth',
+  'other-offices',
+  'project-sites',
+  'oms-sites',
+  'manufacturing-plant',
+  'international',
+  'other',
+] as const;
 export type QuestionScope = (typeof QUESTION_SCOPES)[number];
 
 export interface IAttachment {
