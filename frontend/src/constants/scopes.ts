@@ -2,8 +2,11 @@ import { QuestionScope } from '@/types';
 
 export const SCOPE_OPTIONS: { value: QuestionScope; label: string }[] = [
   { value: 'one-earth', label: 'One Earth' },
-  { value: 'sites', label: 'Sites' },
-  { value: 'other', label: 'Other' },
+  { value: 'other-offices', label: 'Other Offices' },
+  { value: 'project-sites', label: 'Project Sites' },
+  { value: 'oms-sites', label: 'OMS Sites' },
+  { value: 'manufacturing-plant', label: 'Manufacturing Plant' },
+  { value: 'international', label: 'International' },
 ];
 
 export const scopeLabel = (scope?: string) =>
