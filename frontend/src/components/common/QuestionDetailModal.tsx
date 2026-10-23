@@ -112,7 +112,7 @@ export const QuestionDetailModal = ({
               )
             ) : (
               <div className="rounded-lg border border-dashed border-ink-600 bg-ink-900/60 p-4 text-center text-sm text-ink-400">
-                This question hasn't been answered yet.
+                This question has been successfully recorded.
               </div>
             )}
           </div>
