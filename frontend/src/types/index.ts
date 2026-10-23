@@ -10,7 +10,13 @@ export interface AuthUser {
 }
 
 export type QuestionStatus = 'unanswered' | 'answered' | 'archived';
-export type QuestionScope = 'one-earth' | 'sites' | 'other';
+export type QuestionScope =
+  | 'one-earth'
+  | 'other-offices'
+  | 'project-sites'
+  | 'oms-sites'
+  | 'manufacturing-plant'
+  | 'international';
 
 export interface Attachment {
   fileName: string;
