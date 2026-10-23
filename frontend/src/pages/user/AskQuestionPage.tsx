@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ import { QuestionIdChip } from '@/components/common/QuestionBits';
 import { questionApi, taxonomyApi } from '@/services/endpoints';
 import { QuestionScope, TaxonomyEntry } from '@/types';
 import { SCOPE_OPTIONS } from '@/constants/scopes';
+import { useSocket } from '@/context/SocketContext';
 
 const MAX_CHARS = 1000;
 const MAX_FILES = 5;
@@ -21,6 +22,7 @@ const formatSize = (bytes: number) =>
 export const AskQuestionPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { socket } = useSocket();
 
   const [departments, setDepartments] = useState<TaxonomyEntry[]>([]);
   const [categories, setCategories] = useState<TaxonomyEntry[]>([]);
@@ -39,21 +41,33 @@ export const AskQuestionPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [successId, setSuccessId] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await taxonomyApi.list();
-        setDepartments(data.departments);
-        setCategories(data.categories);
-        if (data.departments[0]) setDepartment(data.departments[0].name);
-        if (data.categories[0]) setCategory(data.categories[0].name);
-      } catch {
-        toast.error('Could not load departments and categories.');
-      } finally {
-        setTaxonomyLoading(false);
-      }
-    })();
+  // Options are re-fetched whenever an admin edits them, so the form never
+  // offers a removed category/department.
+  const loadTaxonomy = useCallback(async () => {
+    try {
+      const { data } = await taxonomyApi.list();
+      setDepartments(data.departments);
+      setCategories(data.categories);
+      setDepartment((cur) => (data.departments.some((d) => d.name === cur) ? cur : data.departments[0]?.name ?? ''));
+      setCategory((cur) => (!cur || data.categories.some((c) => c.name === cur) ? cur : ''));
+    } catch {
+      toast.error('Could not load departments and categories.');
+    } finally {
+      setTaxonomyLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadTaxonomy();
+  }, [loadTaxonomy]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('taxonomy:changed', loadTaxonomy);
+    return () => {
+      socket.off('taxonomy:changed', loadTaxonomy);
+    };
+  }, [socket, loadTaxonomy]);
 
   const handleFilesSelected = (fileList: FileList | null) => {
     if (!fileList) return;
@@ -87,9 +101,8 @@ export const AskQuestionPage = () => {
     const next: Record<string, string> = {};
     if (!isAnonymous && !name.trim()) next.name = 'Name is required unless submitting anonymously.';
     if (!department) next.department = 'Select a department.';
-    if (!scope) next.scope = 'Select One Earth, Sites or Other.';
+    if (!scope) next.scope = 'Please select a scope.';
     if (!location.trim()) next.location = 'Location is required.';
-    if (!category) next.category = 'Select a category.';
     if (!questionText.trim()) next.questionText = 'Enter your question.';
     else if (questionText.length > MAX_CHARS) next.questionText = `Question must be ${MAX_CHARS} characters or fewer.`;
     setErrors(next);
@@ -125,6 +138,7 @@ export const AskQuestionPage = () => {
     setSuccessId(null);
     setName('');
     setScope('');
+    setCategory('');
     setLocation('');
     setQuestionText('');
     setFiles([]);
@@ -175,7 +189,7 @@ export const AskQuestionPage = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-ink-700 bg-ink-900/50 p-6">
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-ink-700 bg-ink-900/50 p-4 sm:p-6">
         <div className="flex items-center justify-between rounded-lg border border-ink-700 bg-ink-900 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-ink-100">Submit anonymously</p>
@@ -224,12 +238,12 @@ export const AskQuestionPage = () => {
             ))}
           </Select>
           <Select
-            label="Category"
-            required
+            label="Category (optional)"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             error={errors.category}
           >
+            <option value="">No category</option>
             {categories.map((c) => (
               <option key={c._id} value={c.name}>
                 {c.name}

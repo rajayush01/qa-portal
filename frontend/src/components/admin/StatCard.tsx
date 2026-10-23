@@ -23,7 +23,7 @@ export const StatCard = ({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-ink-700 bg-ink-900/60 p-5"
+      className="rounded-2xl border border-ink-700 bg-ink-900/60 p-4 sm:p-5"
     >
       <div className="flex items-center justify-between">
         <p className="text-sm text-ink-400">{label}</p>

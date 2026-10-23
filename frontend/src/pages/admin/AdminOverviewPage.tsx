@@ -8,13 +8,14 @@ import { StatCard } from '@/components/admin/StatCard';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
 import { CardSkeleton, EmptyState } from '@/components/common/States';
+import { InsightsPanel } from '@/components/admin/InsightsPanel';
 import { useSocket } from '@/context/SocketContext';
 
 export const AdminOverviewPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recent, setRecent] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
   const navigate = useNavigate();
 
   const load = useCallback(async () => {
@@ -42,15 +43,22 @@ export const AdminOverviewPage = () => {
     const refresh = () => load();
     socket.on('question:new', refresh);
     socket.on('question:answered', refresh);
+    socket.on('question:updated', refresh);
     return () => {
       socket.off('question:new', refresh);
       socket.off('question:answered', refresh);
+      socket.off('question:updated', refresh);
     };
   }, [socket, load]);
 
+  // Catch up after a dropped connection.
+  useEffect(() => {
+    if (connected) load();
+  }, [connected, load]);
+
   return (
     <div>
-      <h1 className="mb-1 font-display text-2xl text-ink-100">Overview</h1>
+      <h1 className="mb-1 font-display text-xl text-ink-100 sm:text-2xl">Overview</h1>
       <p className="mb-6 text-sm text-ink-400">Live snapshot of question activity across the portal.</p>
 
       {loading ? (
@@ -67,6 +75,8 @@ export const AdminOverviewPage = () => {
           <StatCard label="Today" value={stats?.today ?? 0} icon={CalendarDays} />
         </div>
       )}
+
+      <InsightsPanel />
 
       <div className="mt-10">
         <div className="mb-4 flex items-center justify-between">

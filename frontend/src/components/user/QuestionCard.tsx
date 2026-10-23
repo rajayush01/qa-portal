@@ -3,7 +3,7 @@ import { Paperclip, ChevronRight } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
-import { scopeLabel } from '@/constants/scopes';
+import { scopeLabel, categoryLabel } from '@/constants/scopes';
 
 const fmt = (d: string) => new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -25,7 +25,7 @@ export const QuestionCard = ({ question, onOpen }: { question: Question; onOpen:
     <p className="line-clamp-2 text-sm leading-relaxed text-ink-100">{question.questionText}</p>
     <div className="mt-4 flex items-center justify-between">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-400">
-        <span>{question.category}</span>
+        <span>{categoryLabel(question.category)}</span>
         <span className="h-1 w-1 rounded-full bg-ink-600" />
         <span>{fmt(question.createdAt)}</span>
         {question.attachments.length > 0 && (

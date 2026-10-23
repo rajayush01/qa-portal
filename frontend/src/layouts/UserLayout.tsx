@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { MessageSquarePlus, LayoutList, CheckCircle2, Clock, User as UserIcon, LogOut, Wifi, WifiOff } from 'lucide-react';
+import { MobileNav } from '@/components/common/MobileNav';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 
@@ -64,14 +65,15 @@ export const UserLayout = () => {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-ink-800 bg-ink-900/40 px-5 py-4 md:hidden">
           <p className="font-display text-lg text-ink-100">Q&amp;A Portal</p>
-          <button onClick={logout} className="text-ink-300">
+          <button onClick={logout} className="p-1 text-ink-300" aria-label="Log out">
             <LogOut size={18} />
           </button>
         </header>
-        <main className="flex-1 px-5 py-6 md:px-10 md:py-10">
+        <MobileNav items={NAV} />
+        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 md:px-10 md:py-10">
           <Outlet />
         </main>
       </div>

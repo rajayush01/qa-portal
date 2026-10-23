@@ -9,6 +9,8 @@ const SCOPE_LABELS: Record<string, string> = {
   'oms-sites': 'OMS Sites',
   'manufacturing-plant': 'Manufacturing Plant',
   international: 'International',
+  'se-forge': 'SE FORGE',
+  'renom-energy': 'Renom Energy',
   sites: 'Sites',
   other: 'Other',
 };
@@ -58,7 +60,7 @@ export const streamQuestionsExcel = async (
       department: q.department,
       scope: SCOPE_LABELS[q.scope] ?? 'Other',
       location: q.location,
-      category: q.category,
+      category: q.category || '—',
       question: q.questionText,
       status: q.status,
       answer: q.answer || (q.answeredInPerson ? 'Answered in person (live session)' : ''),

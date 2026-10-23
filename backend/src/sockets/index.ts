@@ -74,6 +74,11 @@ export const emitQuestionAnswered = (question: IQuestion): void => {
   getIO().to(`user:${question.userId.toString()}`).emit('question:answered', payload);
 };
 
+// Admin edited categories/departments — every connected client refetches its options.
+export const emitTaxonomyChanged = (): void => {
+  getIO().emit('taxonomy:changed');
+};
+
 export const emitQuestionUpdated = (question: IQuestion): void => {
   const payload = serializeForBroadcast(question);
   getIO().to('admins').emit('question:updated', payload);

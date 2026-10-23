@@ -17,7 +17,8 @@ export const createQuestion = asyncHandler(async (req: Request, res: Response) =
     throw ApiError.badRequest('Scope must be from the list.');
   }
   const location = requireString(req.body?.location, 'Location');
-  const category = requireString(req.body?.category, 'Category');
+  // Category is optional.
+  const category = typeof req.body?.category === 'string' ? req.body.category.trim() : '';
   const questionText = requireString(req.body?.questionText, 'Question', { maxLength: 1000 });
 
   let name: string | undefined;

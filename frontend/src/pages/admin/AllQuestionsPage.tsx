@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Search as SearchIcon } from 'lucide-react';
@@ -19,18 +19,53 @@ export const AllQuestionsPage = ({
   title: string;
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filters, setFilters] = useState<AdminFilters>({
-    status: lockedStatus,
-    page: 1,
-    limit: 20,
-  });
+  // Filters live in the URL so they can be deep-linked (e.g. from the Overview
+  // insights panel) and survive refresh / back navigation.
+  const filters = useMemo<AdminFilters>(() => {
+    const g = (k: string) => searchParams.get(k) || undefined;
+    return {
+      search: g('search'),
+      status: lockedStatus ?? g('status'),
+      scope: g('scope'),
+      department: g('department'),
+      category: g('category'),
+      location: g('location'),
+      datePreset: g('datePreset'),
+      sessionFlagged: g('sessionFlagged'),
+      page: Math.max(parseInt(g('page') ?? '1', 10) || 1, 1),
+      limit: 20,
+    };
+  }, [searchParams, lockedStatus]);
+
+  const setFilters = useCallback(
+    (next: AdminFilters | ((f: AdminFilters) => AdminFilters)) => {
+      const value = typeof next === 'function' ? next(filters) : next;
+      const params = new URLSearchParams(searchParams);
+      (['search', 'status', 'scope', 'department', 'category', 'location', 'datePreset', 'sessionFlagged'] as const).forEach(
+        (k) => {
+          const v = value[k];
+          if (k === 'status' && lockedStatus) return;
+          if (v && v !== 'all') params.set(k, v);
+          else params.delete(k);
+        }
+      );
+      if (value.page && value.page > 1) params.set('page', String(value.page));
+      else params.delete('page');
+      setSearchParams(params, { replace: true });
+    },
+    [filters, searchParams, setSearchParams, lockedStatus]
+  );
   const [questions, setQuestions] = useState<Question[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [facets, setFacets] = useState({ departments: [] as string[], categories: [] as string[], locations: [] as string[] });
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Question | null>(null);
   const [newIds, setNewIds] = useState<string[]>([]);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
+
+  const loadFacets = useCallback(() => {
+    adminApi.facets().then(({ data }) => setFacets(data.facets)).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,8 +81,8 @@ export const AllQuestionsPage = ({
   }, [filters, lockedStatus]);
 
   useEffect(() => {
-    adminApi.facets().then(({ data }) => setFacets(data.facets)).catch(() => {});
-  }, []);
+    loadFacets();
+  }, [loadFacets]);
 
   useEffect(() => {
     load();
@@ -62,8 +97,14 @@ export const AllQuestionsPage = ({
       .then(({ data }) => setSelected(data.question))
       .catch(() => toast.error('Could not find that question.'))
       .finally(() => {
-        searchParams.delete('open');
-        setSearchParams(searchParams, { replace: true });
+        setSearchParams(
+          (prev) => {
+            const next = new URLSearchParams(prev);
+            next.delete('open');
+            return next;
+          },
+          { replace: true }
+        );
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -74,17 +115,31 @@ export const AllQuestionsPage = ({
       toast(`New question ${q.questionId}`, { icon: '🔔' });
       setNewIds((prev) => [...prev, q.questionId]);
       load();
+      loadFacets();
       setTimeout(() => setNewIds((prev) => prev.filter((id) => id !== q.questionId)), 2200);
     };
-    const onAnswered = () => load();
+    const onChanged = () => load();
     socket.on('question:new', onNew);
-    socket.on('question:answered', onAnswered);
+    socket.on('question:answered', onChanged);
+    socket.on('question:updated', onChanged);
+    socket.on('taxonomy:changed', loadFacets);
     return () => {
       socket.off('question:new', onNew);
-      socket.off('question:answered', onAnswered);
+      socket.off('question:answered', onChanged);
+      socket.off('question:updated', onChanged);
+      socket.off('taxonomy:changed', loadFacets);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
+  }, [socket, load, loadFacets]);
+
+  // Catch up on anything missed while the socket was down.
+  useEffect(() => {
+    if (connected) {
+      load();
+      loadFacets();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected]);
 
   const handleAnswered = (updated: Question) => {
     setQuestions((prev) => prev.map((q) => (q.questionId === updated.questionId ? updated : q)));
@@ -95,7 +150,7 @@ export const AllQuestionsPage = ({
 
   return (
     <div>
-      <h1 className="mb-6 font-display text-2xl text-ink-100">{title}</h1>
+      <h1 className="mb-4 font-display text-xl text-ink-100 sm:mb-6 sm:text-2xl">{title}</h1>
 
       <FilterBar
         filters={filters}

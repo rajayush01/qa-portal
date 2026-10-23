@@ -81,7 +81,7 @@ export const RadioGroup = <T extends string>({
   options,
 }: RadioGroupProps<T>) => (
   <FieldChrome label={label} error={error} hint={hint} required={required}>
-    <div role="radiogroup" aria-label={label} className="grid grid-cols-3 gap-2">
+    <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {options.map((o) => {
         const checked = value === o.value;
         return (

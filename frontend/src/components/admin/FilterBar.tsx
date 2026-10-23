@@ -40,6 +40,11 @@ export const FilterBar = ({
 }) => {
   const [search, setSearch] = useState(filters.search || '');
 
+  // Keep the box in step when filters change from outside (URL / drill-down).
+  useEffect(() => {
+    setSearch(filters.search || '');
+  }, [filters.search]);
+
   // Debounced search — commit to parent 350ms after typing stops.
   useEffect(() => {
     const t = setTimeout(() => {
@@ -52,21 +57,21 @@ export const FilterBar = ({
   }, [search]);
 
   const selectClass =
-    'rounded-lg border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-200 focus:outline-none focus:ring-2 focus:ring-accent-500/40';
+    'w-full min-w-0 rounded-lg border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-200 focus:outline-none focus:ring-2 focus:ring-accent-500/40 sm:w-auto';
 
   return (
-    <div className="mb-5 space-y-3 rounded-2xl border border-ink-700 bg-ink-900/50 p-4">
+    <div className="mb-5 space-y-3 rounded-2xl border border-ink-700 bg-ink-900/50 p-3 sm:p-4">
       <div className="relative">
         <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-500" />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by ID, question text, name, department…"
+          placeholder="Search ID, question, name, department…"
           className="w-full rounded-lg border border-ink-600 bg-ink-900 py-2.5 pl-9 pr-3 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap">
         {!lockStatus && (
           <select
             value={filters.status || 'all'}
@@ -113,6 +118,7 @@ export const FilterBar = ({
           className={selectClass}
         >
           <option value="all">All categories</option>
+          <option value="__none__">Uncategorised</option>
           {categories.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -145,7 +151,16 @@ export const FilterBar = ({
           ))}
         </select>
 
-        <div className="ml-auto flex items-center gap-2">
+        <label className="col-span-2 flex cursor-pointer items-center gap-2 rounded-lg border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-200 sm:col-span-1">
+          <input
+            type="checkbox"
+            checked={filters.sessionFlagged === 'true'}
+            onChange={(e) => onChange({ ...filters, sessionFlagged: e.target.checked ? 'true' : undefined, page: 1 })}
+          />
+          For later
+        </label>
+
+        <div className="col-span-2 flex items-center gap-2 sm:ml-auto">
           <Button variant="secondary" size="sm" onClick={onExportFiltered}>
             <Download size={14} />
             Export

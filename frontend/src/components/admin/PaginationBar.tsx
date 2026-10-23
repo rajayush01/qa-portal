@@ -11,11 +11,11 @@ export const PaginationBar = ({
   if (pagination.totalPages <= 1) return null;
 
   return (
-    <div className="mt-5 flex items-center justify-between text-sm text-ink-400">
+    <div className="mt-5 flex flex-col gap-3 text-sm text-ink-400 sm:flex-row sm:items-center sm:justify-between">
       <p>
         Showing page {pagination.page} of {pagination.totalPages} · {pagination.total} results
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 self-end sm:self-auto">
         <button
           disabled={pagination.page <= 1}
           onClick={() => onPageChange(pagination.page - 1)}

@@ -9,6 +9,8 @@ export const QUESTION_SCOPES = [
   'oms-sites',
   'manufacturing-plant',
   'international',
+  'se-forge',
+  'renom-energy',
   'other',
 ] as const;
 export type QuestionScope = (typeof QUESTION_SCOPES)[number];
@@ -64,7 +66,7 @@ const questionSchema = new Schema<IQuestion>(
     department: { type: String, required: true, trim: true, index: true },
     scope: { type: String, enum: QUESTION_SCOPES, default: 'other', required: true, index: true },
     location: { type: String, required: true, trim: true, index: true },
-    category: { type: String, required: true, trim: true, index: true },
+    category: { type: String, default: '', trim: true, index: true }, // optional
     questionText: { type: String, required: true, trim: true, maxlength: 1000 },
     attachments: { type: [attachmentSchema], default: [] },
     status: {

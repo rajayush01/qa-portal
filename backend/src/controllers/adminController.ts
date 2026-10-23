@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import { FilterQuery } from 'mongoose';
+import { Category } from '../models/Category';
 import { Question, IQuestion, QUESTION_SCOPES } from '../models/Question';
 import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { requireString } from '../utils/validate';
-import { emitQuestionAnswered } from '../sockets/index';
+import { emitQuestionAnswered, emitQuestionUpdated } from '../sockets/index';
 import { streamQuestionsExcel } from '../services/excelExportService';
 
 const DATE_PRESETS: Record<string, () => Date> = {
@@ -55,7 +56,12 @@ const buildFilter = (query: Request['query']): FilterQuery<IQuestion> => {
   if (department && department !== 'all') filter.department = department;
 
   const category = query.category as string | undefined;
-  if (category && category !== 'all') filter.category = category;
+  if (category === '__none__') {
+    // "Uncategorised": blank or missing category (it is optional).
+    filter.$and = [...(filter.$and ?? []), { $or: [{ category: '' }, { category: { $exists: false } }] }];
+  } else if (category && category !== 'all') {
+    filter.category = category;
+  }
 
   const scope = query.scope as string | undefined;
   if (scope && (QUESTION_SCOPES as readonly string[]).includes(scope)) {
@@ -192,6 +198,8 @@ export const flagForLater = asyncHandler(async (req: Request, res: Response) => 
   question.sessionFlagged = true;
   await question.save();
 
+  emitQuestionUpdated(question);
+
   res.status(200).json({ success: true, question });
 });
 
@@ -209,5 +217,58 @@ export const getFacets = asyncHandler(async (_req: Request, res: Response) => {
     Question.distinct('category'),
     Question.distinct('location'),
   ]);
-  res.status(200).json({ success: true, facets: { departments, categories, locations } });
+  // Follow the admin-defined dropdown order; values no longer in the taxonomy
+  // (removed/legacy) go after, alphabetically.
+  const taxonomy = await Category.find().select('name kind order').lean();
+  const rank = (kind: string, name: string) => {
+    const t = taxonomy.find((e) => e.kind === kind && e.name === name);
+    return t ? t.order ?? 0 : Number.MAX_SAFE_INTEGER;
+  };
+  const byOrder = (kind: string) => (a: string, b: string) =>
+    rank(kind, a) - rank(kind, b) || a.localeCompare(b);
+
+  res.status(200).json({
+    success: true,
+    facets: {
+      departments: [...departments].sort(byOrder('department')),
+      categories: categories.filter(Boolean).sort(byOrder('category')),
+      locations,
+    },
+  });
+});
+
+// "Where do most questions come from?" — counts per dimension, honouring the
+// same filters as the listing so the admin can slice it (e.g. top categories
+// within one scope, or top locations this week).
+const INSIGHT_DIMENSIONS = ['scope', 'department', 'category', 'location', 'status'] as const;
+
+export const getInsights = asyncHandler(async (req: Request, res: Response) => {
+  const filter = buildFilter(req.query);
+  const limit = Math.min(Math.max(parseInt(String(req.query.top ?? '8'), 10), 1), 50);
+
+  const results = await Promise.all(
+    INSIGHT_DIMENSIONS.map(async (dim) => {
+      const rows = await Question.aggregate([
+        { $match: filter as any },
+        {
+          $group: {
+            _id: {
+              $cond: [
+                { $in: [{ $ifNull: [`$${dim}`, ''] }, ['']] },
+                dim === 'scope' ? 'other' : '',
+                `$${dim}`,
+              ],
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1, _id: 1 } },
+        { $limit: limit },
+      ]);
+      return [dim, rows.map((r) => ({ value: r._id as string, count: r.count as number }))] as const;
+    })
+  );
+
+  const total = await Question.countDocuments(filter);
+  res.status(200).json({ success: true, total, insights: Object.fromEntries(results) });
 });

@@ -3,7 +3,7 @@ import { Paperclip, Bookmark } from 'lucide-react';
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip } from '@/components/common/QuestionBits';
-import { scopeLabel } from '@/constants/scopes';
+import { scopeLabel, categoryLabel } from '@/constants/scopes';
 
 const fmt = (d: string) => new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -18,7 +18,7 @@ export const QuestionsTable = ({
 }) => (
   <>
     {/* Desktop table */}
-    <div className="hidden overflow-hidden rounded-2xl border border-ink-700 md:block">
+    <div className="hidden overflow-x-auto rounded-2xl border border-ink-700 lg:block">
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-ink-700 bg-ink-900/80 text-xs uppercase tracking-wide text-ink-400">
@@ -51,7 +51,7 @@ export const QuestionsTable = ({
               <td className="px-4 py-3.5 text-ink-300">{scopeLabel(q.scope)}</td>
               <td className="px-4 py-3.5 text-ink-300">
                 <div>{q.department}</div>
-                <div className="text-xs text-ink-500">{q.category}</div>
+                <div className="text-xs text-ink-500">{categoryLabel(q.category)}</div>
               </td>
               <td className="max-w-xs px-4 py-3.5">
                 <p className="truncate text-ink-200">{q.questionText}</p>
@@ -73,7 +73,7 @@ export const QuestionsTable = ({
     </div>
 
     {/* Mobile cards */}
-    <div className="space-y-3 md:hidden">
+    <div className="space-y-3 lg:hidden">
       {questions.map((q) => (
         <motion.button
           layout
@@ -91,9 +91,9 @@ export const QuestionsTable = ({
             <StatusBadge status={q.status} />
           </div>
           <p className="line-clamp-2 text-sm text-ink-100">{q.questionText}</p>
-          <div className="mt-2 flex items-center justify-between text-xs text-ink-400">
+          <div className="mt-2 flex flex-col gap-1 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
             <span>
-              {scopeLabel(q.scope)} · {q.department} · {q.category}
+              {scopeLabel(q.scope)} · {q.department} · {categoryLabel(q.category)}
             </span>
             <span>{fmt(q.createdAt)}</span>
           </div>

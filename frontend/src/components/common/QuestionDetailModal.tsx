@@ -3,7 +3,7 @@ import { X, Calendar, Building2, Layers, MapPin, Tag, User as UserIcon, CheckCir
 import { Question } from '@/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { QuestionIdChip, AttachmentList } from '@/components/common/QuestionBits';
-import { scopeLabel } from '@/constants/scopes';
+import { scopeLabel, categoryLabel } from '@/constants/scopes';
 
 const fmt = (d?: string) => (d ? new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
 
@@ -31,7 +31,7 @@ export const QuestionDetailModal = ({
           transition={{ duration: 0.2, ease: 'easeOut' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="sticky top-0 flex items-center justify-between border-b border-ink-700 bg-ink-800 px-6 py-4">
+          <div className="sticky top-0 flex items-center justify-between border-b border-ink-700 bg-ink-800 px-4 py-3.5 sm:px-6 sm:py-4">
             <div className="flex items-center gap-3">
               <QuestionIdChip id={question.questionId} />
               {/* <StatusBadge status={question.status} /> */}
@@ -41,31 +41,31 @@ export const QuestionDetailModal = ({
             </button>
           </div>
 
-          <div className="space-y-5 px-6 py-5">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center gap-2 text-ink-400">
+          <div className="space-y-5 px-4 py-4 sm:px-6 sm:py-5">
+            <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+              <div className="flex min-w-0 items-center gap-2 break-words text-ink-400">
                 <UserIcon size={14} />
                 {question.isAnonymous ? 'Anonymous' : question.name || '—'}
               </div>
-              <div className="flex items-center gap-2 text-ink-400">
+              <div className="flex min-w-0 items-center gap-2 break-words text-ink-400">
                 <Calendar size={14} />
                 {fmt(question.createdAt)}
               </div>
-              <div className="flex items-center gap-2 text-ink-400">
+              <div className="flex min-w-0 items-center gap-2 break-words text-ink-400">
                 <Building2 size={14} />
                 {question.department}
               </div>
-              <div className="flex items-center gap-2 text-ink-400">
+              <div className="flex min-w-0 items-center gap-2 break-words text-ink-400">
                 <Layers size={14} />
                 {scopeLabel(question.scope)}
               </div>
-              <div className="flex items-center gap-2 text-ink-400">
+              <div className="flex min-w-0 items-center gap-2 break-words text-ink-400">
                 <MapPin size={14} />
                 {question.location}
               </div>
-              <div className="flex items-center gap-2 text-ink-400">
+              <div className="flex min-w-0 items-center gap-2 break-words text-ink-400">
                 <Tag size={14} />
-                {question.category}
+                {categoryLabel(question.category)}
               </div>
             </div>
 

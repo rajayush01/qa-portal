@@ -16,7 +16,9 @@ export type QuestionScope =
   | 'project-sites'
   | 'oms-sites'
   | 'manufacturing-plant'
-  | 'international';
+  | 'international'
+  | 'se-forge'
+  | 'renom-energy';
 
 export interface Attachment {
   fileName: string;
@@ -67,6 +69,16 @@ export interface TaxonomyEntry {
   name: string;
   kind: 'category' | 'department';
   isActive: boolean;
+}
+
+export interface InsightRow {
+  value: string;
+  count: number;
+}
+export type InsightDimension = 'scope' | 'department' | 'category' | 'location' | 'status';
+export interface Insights {
+  total: number;
+  insights: Record<InsightDimension, InsightRow[]>;
 }
 
 export interface AdminFilters {

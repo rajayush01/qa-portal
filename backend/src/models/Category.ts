@@ -7,6 +7,7 @@ export interface ICategory extends Document {
   name: string;
   kind: TaxonomyKind;
   isActive: boolean;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +17,7 @@ const categorySchema = new Schema<ICategory>(
     name: { type: String, required: true, trim: true, maxlength: 60 },
     kind: { type: String, enum: ['category', 'department'], required: true, index: true },
     isActive: { type: Boolean, default: true },
+    order: { type: Number, default: 0, index: true }, // position in dropdowns (admin-controlled)
   },
   { timestamps: true }
 );

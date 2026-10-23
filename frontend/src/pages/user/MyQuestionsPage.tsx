@@ -33,7 +33,7 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Question | null>(null);
   const [scope, setScope] = useState<'all' | string>('all');
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
   const copy = COPY[status];
 
   const load = useCallback(async () => {
@@ -50,7 +50,8 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
 
   useEffect(() => {
     load();
-  }, [load]);
+    // Refetch on (re)connect so answers given while offline show up.
+  }, [load, connected]);
 
   useEffect(() => {
     if (!socket) return;
@@ -65,9 +66,16 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
       setSelected((prev) => (prev?.questionId === updated.questionId ? updated : prev));
     };
 
+    const onUpdated = (updated: Question) => {
+      setQuestions((prev) => prev.map((q) => (q.questionId === updated.questionId ? updated : q)));
+      setSelected((prev) => (prev?.questionId === updated.questionId ? updated : prev));
+    };
+
     socket.on('question:answered', onAnswered);
+    socket.on('question:updated', onUpdated);
     return () => {
       socket.off('question:answered', onAnswered);
+      socket.off('question:updated', onUpdated);
     };
   }, [socket]);
 
@@ -81,9 +89,9 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
 
   return (
     <div>
-      <h1 className="mb-4 font-display text-2xl text-ink-100">{copy.title}</h1>
+      <h1 className="mb-4 font-display text-xl text-ink-100 sm:text-2xl">{copy.title}</h1>
 
-      <div className="mb-6 flex flex-wrap gap-2" role="radiogroup" aria-label="Filter by scope">
+      <div className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="radiogroup" aria-label="Filter by scope">
         {[{ value: 'all', label: 'All' }, ...SCOPE_OPTIONS].map((o) => {
           const active = scope === o.value;
           return (
@@ -93,7 +101,7 @@ export const MyQuestionsPage = ({ status = 'all' }: { status?: 'all' | 'answered
               role="radio"
               aria-checked={active}
               onClick={() => setScope(o.value)}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
                 active
                   ? 'border-accent-500 bg-accent-500/10 text-accent-300'
                   : 'border-ink-600 text-ink-300 hover:border-ink-500'

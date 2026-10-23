@@ -1,5 +1,5 @@
 import { api } from './api';
-import { AdminFilters, AuthUser, Question, DashboardStats, Pagination, TaxonomyEntry } from '@/types';
+import { AdminFilters, Insights, AuthUser, Question, DashboardStats, Pagination, TaxonomyEntry } from '@/types';
 
 export const authApi = {
   login: (email: string, password: string) =>
@@ -18,6 +18,8 @@ export const taxonomyApi = {
   update: (id: string, patch: Partial<{ name: string; isActive: boolean }>) =>
     api.put(`/categories/${id}`, patch),
   remove: (id: string) => api.delete(`/categories/${id}`),
+  reorder: (kind: 'category' | 'department', ids: string[]) =>
+    api.put('/categories/reorder', { kind, ids }),
 };
 
 export const questionApi = {
@@ -53,6 +55,10 @@ export const adminApi = {
       success: boolean;
       facets: { departments: string[]; categories: string[]; locations: string[] };
     }>('/admin/facets'),
+  insights: (filters: AdminFilters, top = 8) =>
+    api.get<{ success: boolean } & Insights>('/admin/insights', {
+      params: { ...buildParams(filters), page: undefined, limit: undefined, top },
+    }),
   list: (filters: AdminFilters) =>
     api.get<{ success: boolean; questions: Question[]; pagination: Pagination }>(
       '/admin/questions',

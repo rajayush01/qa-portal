@@ -8,6 +8,7 @@ import {
   flagForLater,
   exportQuestions,
   getFacets,
+  getInsights,
 } from '../controllers/adminController';
 import { requireAuth, requireRole } from '../middleware/auth';
 
@@ -17,6 +18,7 @@ router.use(requireAuth, requireRole('admin'));
 
 router.get('/stats', getDashboardStats);
 router.get('/facets', getFacets);
+router.get('/insights', getInsights);
 router.get('/questions/export', exportQuestions);
 router.get('/questions/:questionId', getQuestionById);
 router.post('/questions/:questionId/answer', answerQuestion);
