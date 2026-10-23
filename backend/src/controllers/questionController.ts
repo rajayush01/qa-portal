@@ -14,7 +14,7 @@ export const createQuestion = asyncHandler(async (req: Request, res: Response) =
   const department = requireString(req.body?.department, 'Department');
   const scope = requireString(req.body?.scope, 'Scope') as QuestionScope;
   if (!QUESTION_SCOPES.includes(scope)) {
-    throw ApiError.badRequest('Scope must be One Earth, Sites or Other.');
+    throw ApiError.badRequest('Scope must be from the list.');
   }
   const location = requireString(req.body?.location, 'Location');
   const category = requireString(req.body?.category, 'Category');
