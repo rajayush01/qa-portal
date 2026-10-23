@@ -146,7 +146,7 @@ export const AskQuestionPage = () => {
         <p className="mt-2 text-sm text-ink-400">Your Question ID</p>
         <QuestionIdChip id={successId} className="mt-3 text-sm" />
         <p className="mt-4 text-sm text-ink-400">
-          You can track the status of your question from your dashboard.
+          Your question has been successfully recorded.
         </p>
         <div className="mt-7 flex gap-3">
           <Button variant="secondary" onClick={resetForm}>
@@ -211,7 +211,7 @@ export const AskQuestionPage = () => {
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Select
-            label="Your question's department"
+            label="Your query is related to"
             required
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
